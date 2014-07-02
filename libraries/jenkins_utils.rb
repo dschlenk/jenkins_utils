@@ -130,6 +130,7 @@ module JenkinsUtils
       script_path = "#{Chef::Config[:file_cache_path]}/removeCustomFile.groovy"
       template script_path do
         source "removeCustomFile.groovy.erb"
+        cookbook 'jenkins_utils'
         user node['jenkins']['master']['user']
         group node['jenkins']['master']['group']
         mode 00644

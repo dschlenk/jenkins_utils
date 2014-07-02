@@ -108,6 +108,7 @@ def create_cookbook_job
   description = "Jenkins Job for Chef cookbook #{new_resource.name}." if new_resource.description.nil?
   template config_xml do
     source 'config.xml.erb'
+    cookbook 'jenkins_utils'
     variables(
       :description => description, 
       :keep_dependencies => new_resource.keep_dependencies,
