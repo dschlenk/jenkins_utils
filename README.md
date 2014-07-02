@@ -40,7 +40,7 @@ jenkins_utils_cookbook_job "sudo" do
   git_repo_url 'https://github.com/opscode-cookbooks/openssh.git'
   git_branch 'master'
   commands ['bundle exec rspec', 'bundle exec foodcritic .', 'bundle exec rubocop', 'bundle exec kitchen test']
-  managed_files [{'file_id' => '.kitchen.local.yml-openstack'}, 'target_location' => '.kitchen.local.yml'}]
+  managed_files [{'file_id' => '.kitchen.local.yml-openstack'}, {'target_location' => '.kitchen.local.yml'}]
   rvm_env '1.9.3'
 end
 ```

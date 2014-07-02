@@ -32,5 +32,5 @@ end
 
 jenkins_plugin "config-file-provider" do
     version '2.7.4'
-    notifies :restart, "service[jenkins]"
+    notifies :restart, "service[jenkins]", :immediately
 end

@@ -2,6 +2,10 @@ DEPENDENCIES
   jenkins_utils
     path: .
     metadata: true
+  jenkins_utils_cookbook_job
+    path: test/fixtures/cookbooks/jenkins_utils_cookbook_job
+  jenkins_utils_custom_file
+    path: test/fixtures/cookbooks/jenkins_utils_custom_file
 
 GRAPH
   apt (2.4.0)
@@ -26,6 +30,10 @@ GRAPH
     java (>= 0.0.0)
     jenkins (>= 0.0.0)
     rvm (>= 0.0.0)
+  jenkins_utils_cookbook_job (0.0.0)
+    jenkins_utils (>= 0.0.0)
+  jenkins_utils_custom_file (0.0.0)
+    jenkins_utils (>= 0.0.0)
   runit (1.5.10)
     build-essential (>= 0.0.0)
     yum (~> 3.0)

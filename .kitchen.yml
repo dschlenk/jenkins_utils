@@ -14,3 +14,7 @@ suites:
     run_list:
       - recipe[jenkins_utils::default]
     attributes:
+  - name: jenkins_utils_custom_file
+    run_list: jenkins_utils_custom_file::my_custom_file
+  - name: jenkins_utils_cookbook_job
+    run_list: jenkins_utils_cookbook_job::openssh_job
