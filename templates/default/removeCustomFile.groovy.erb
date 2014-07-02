@@ -1,0 +1,8 @@
+import jenkins.*
+import jenkins.model.*
+import hudson.*
+import hudson.model.*
+import org.jenkinsci.plugins.configfiles.custom.*
+  
+ccp = new org.jenkinsci.plugins.configfiles.custom.CustomConfig.CustomConfigProvider()
+ccp.remove(<%=@id%>)

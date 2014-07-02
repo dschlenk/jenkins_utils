@@ -1,0 +1,9 @@
+import jenkins.*
+import jenkins.model.*
+import hudson.*
+import hudson.model.*
+import org.jenkinsci.plugins.configfiles.custom.*
+  
+ccp = new org.jenkinsci.plugins.configfiles.custom.CustomConfig.CustomConfigProvider()
+config = new org.jenkinsci.plugins.configfiles.custom.CustomConfig("<%=@id%>", "<%=@name%>", "<%=@comment%>", "<%=@content%>")
+ccp.save(config)
