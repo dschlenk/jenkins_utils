@@ -1,3 +1,4 @@
+# encoding: UTF-8
 name             'jenkins_utils'
 maintainer       'Spanlink Communications'
 maintainer_email 'david.schlenk@spanlink.com'
@@ -6,6 +7,7 @@ description      'Utilities for managing Jenkins jobs with Chef.'
 long_description 'Utilities for managing Jenkins jobs with Chef.'
 version          '0.1.0'
 
+depends          'apt'
 depends          'jenkins'
 depends          'rvm'
 depends          'git'

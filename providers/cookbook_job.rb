@@ -1,7 +1,8 @@
+# encoding: UTF-8
 include JenkinsUtils
 
 def whyrun_supported?
-    true
+  true
 end
 
 use_inline_resources
@@ -19,7 +20,7 @@ end
 
 action :create do
   if @current_resource.exists && !@current_resource.changed
-    Chef::Log.info "#{ @new_resource } already exists and unchanged - nothing to do."
+    Chef::Log.info "#{ @new_resource } exists and unchanged - nothing to do."
   elsif @current_resource.exists
     Chef::Log.info "#{ @new_resource } already exists - updating."
     converge_by("Update #{ @new_resource }") do
@@ -90,39 +91,37 @@ def load_current_resource
   @current_resource.managed_files(@new_resource.managed_files)
   @current_resource.rvm_env(@new_resource.rvm_env)
 
-  if job_exists?(node, @current_resource.name)
-     @current_resource.exists = true
-     if job_disabled?(node, @current_resource.name)
-       @current_resource.job_disabled = true
-     end 
-     if job_changed?(node, @current_resource)
-       @current_resource.changed = true
-     end
-  end
+  return unless job_exists?(node, @current_resource.name)
+  @current_resource.exists = true
+  @current_resource.job_disabled = true if job_disabled?(node,
+                                                         @current_resource.name)
+  @current_resource.changed = true if job_changed?(node, @current_resource)
 end
 
 private
 
 def create_cookbook_job
-  config_xml = ::File.join(Chef::Config[:file_cache_path], "#{new_resource.name}-config.xml")
-  description = "Jenkins Job for Chef cookbook #{new_resource.name}." if new_resource.description.nil?
+  config_xml = ::File.join(Chef::Config[:file_cache_path],
+                           "#{new_resource.name}-config.xml")
+  if new_resource.description.nil?
+    new_resource.description =
+      "Jenkins Job for Chef cookbook #{new_resource.name}."
+  end
   template config_xml do
     source 'config.xml.erb'
     cookbook 'jenkins_utils'
-    variables(
-      :description => description, 
-      :keep_dependencies => new_resource.keep_dependencies,
-      :git_repo_url => new_resource.git_repo_url,
-      :git_branch => new_resource.git_branch,
-      :can_roam => new_resource.can_roam,
-      :job_disabled => new_resource.job_disabled,
-      :block_downstream => new_resource.block_downstream,
-      :block_upstream => new_resource.block_upstream,
-      :concurrent_build => new_resource.concurrent_build,
-      :commands => new_resource.commands,
-      :managed_files => new_resource.managed_files,
-      :rvm_env => new_resource.rvm_env
-    )
+    variables(description: new_resource.description,
+              keep_dependencies: new_resource.keep_dependencies,
+              git_repo_url: new_resource.git_repo_url,
+              git_branch: new_resource.git_branch,
+              can_roam: new_resource.can_roam,
+              job_disabled: new_resource.job_disabled,
+              block_downstream: new_resource.block_downstream,
+              block_upstream: new_resource.block_upstream,
+              concurrent_build: new_resource.concurrent_build,
+              commands: new_resource.commands,
+              managed_files: new_resource.managed_files,
+              rvm_env: new_resource.rvm_env)
   end
   jenkins_job new_resource.name do
     config config_xml

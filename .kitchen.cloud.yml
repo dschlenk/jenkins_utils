@@ -1,0 +1,28 @@
+---
+driver:
+  name: openstack
+  flavor_ref: m1.small
+
+provisioner:
+  name: chef_solo
+  chef_omnibus_url: http://www.getchef.com/chef/install.sh
+
+platforms:
+  - name: ubuntu-12.04
+    driver_config:
+      image_ref: /Ubuntu 12.04.4/
+      username: ubuntu
+  - name: centos-6.5
+    driver_config:
+      image_ref: /CentOS 6.5/
+      username: ec2-user
+
+suites:
+  - name: default
+    run_list:
+      - recipe[jenkins_utils::default]
+    attributes:
+  - name: jenkins_utils_custom_file
+    run_list: jenkins_utils_custom_file::my_custom_file
+  - name: jenkins_utils_cookbook_job
+    run_list: jenkins_utils_cookbook_job::openssh_job
