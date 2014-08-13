@@ -67,7 +67,8 @@ Pretty standard workflow:
 
 Authors
 -------
-David Schlenk david.schlenk@spanlink.com
+* David Schlenk david.schlenk@spanlink.com
+
 Roughly inspired/based on [Zachary Stevens'](zts@cryptocracy.com) [Cooking With Jenkins](https://github.com/zts/cooking-with-jenkins) cookbook. 
 
 License
