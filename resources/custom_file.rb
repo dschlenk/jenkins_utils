@@ -5,6 +5,7 @@ default_action :create
 attribute :name, kind_of: String, name_attribute: true
 attribute :id, kind_of: String, required: true
 attribute :comment, kind_of: String
-attribute :content, kind_of: String
+# Array of strings (lines of content)
+attribute :content, kind_of: Array
 
 attr_accessor :exists, :changed

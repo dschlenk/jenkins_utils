@@ -5,5 +5,12 @@ import hudson.model.*
 import org.jenkinsci.plugins.configfiles.custom.*
   
 ccp = new org.jenkinsci.plugins.configfiles.custom.CustomConfig.CustomConfigProvider()
-config = new org.jenkinsci.plugins.configfiles.custom.CustomConfig("<%=@id%>", "<%=@name%>", "<%=@comment%>", "<%=@content%>")
+config = new org.jenkinsci.plugins.configfiles.custom.CustomConfig("<%=@id%>", "<%=@name%>", "<%=@comment%>", 
+<% @content.each_with_index do |line, i| -%>
+  <% if @content.length > 1 && i < (@content.length - 1) %>
+    "<%=line.gsub(/\"/, '\"')%>\n" +
+  <% else %>
+    "<%=line.gsub(/\"/, '\"')%>\n")
+  <% end -%>
+<% end -%>
 ccp.save(config)

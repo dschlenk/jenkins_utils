@@ -127,7 +127,7 @@ module JenkinsUtils
     pre1 = '/project/buildWrappers'
     pre2 = '/org.jenkinsci.plugins.configfiles.buildwrapper'
     pre3 = '.ConfigFileBuildWrapper'
-    plg = "@plugin = 'config-file-provider@2.7.4']/managedFiles"
+    plg = "@plugin = 'config-file-provider@2.7.5']/managedFiles"
     @managed_files ||= begin
                          mfs = []
                          mf_els = doc.elements["#{pre1}#{pre2}#{pre3}[#{plg}"]
@@ -200,7 +200,7 @@ module JenkinsUtils
             doc = REXML::Document.new file
             file.close
             configs_el = doc.elements["/#{jenkins_pkg_str}Provider[@plugin = \
-              'config-file-provider@2.7.4']/configs"]
+              'config-file-provider@2.7.5']/configs"]
             configs_el.elements.each do |entry|
               key = entry.elements['string'].text
               id = entry.elements["#{jenkins_pkg_str}/id"].text
@@ -211,6 +211,7 @@ module JenkinsUtils
                                     content: content }
             end
           end
+          config_files
         end
     end
   end

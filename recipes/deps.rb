@@ -30,7 +30,7 @@ service 'jenkins'
   jenkins_plugin plugin
 end
 
-%w{violations dashboard-view warnings ruby-runtime rvm}.each do |plugin|
+%w{violations dashboard-view warnings rvm}.each do |plugin|
   jenkins_plugin plugin
 end
 
@@ -45,6 +45,6 @@ jenkins_plugin 'git-client' do
 end
 
 jenkins_plugin 'config-file-provider' do
-  version '2.7.4'
+  version '2.7.5'
   notifies :restart, 'service[jenkins]', :immediately
 end

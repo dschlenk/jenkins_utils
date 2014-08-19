@@ -103,14 +103,12 @@ private
 def create_cookbook_job
   config_xml = ::File.join(Chef::Config[:file_cache_path],
                            "#{new_resource.name}-config.xml")
-  if new_resource.description.nil?
-    new_resource.description =
-      "Jenkins Job for Chef cookbook #{new_resource.name}."
-  end
+  description = "Jenkins Job for Chef cookbook #{new_resource.name}."
+  description = new_resource.description unless new_resource.description.nil?
   template config_xml do
     source 'config.xml.erb'
     cookbook 'jenkins_utils'
-    variables(description: new_resource.description,
+    variables(description: description,
               keep_dependencies: new_resource.keep_dependencies,
               git_repo_url: new_resource.git_repo_url,
               git_branch: new_resource.git_branch,
