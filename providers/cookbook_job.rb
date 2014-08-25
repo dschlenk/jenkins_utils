@@ -1,5 +1,6 @@
 # encoding: UTF-8
 include JenkinsUtils
+include JenkinsUtils::ConfigFileProvider
 
 def whyrun_supported?
   true
@@ -105,6 +106,29 @@ def create_cookbook_job
                            "#{new_resource.name}-config.xml")
   description = "Jenkins Job for Chef cookbook #{new_resource.name}."
   description = new_resource.description unless new_resource.description.nil?
+  managed_files = process_managed_files
+  config_xml_template(config_xml, description, managed_files)
+  jenkins_job new_resource.name do
+    config config_xml
+  end
+end
+
+def process_managed_files
+  managed_files = []
+  unless new_resource.managed_files.nil?
+    new_resource.managed_files.each do |file|
+      fn = file[:file_name] || file['file_name']
+      tl = file[:target_location] || file['target_location']
+      cnf_file = config_files(node)[fn]
+      Chef::Log.info("fn: #{fn}; cnf_files: #{cnf_file}; tl: #{tl}")
+      mf = { file_id: cnf_file[:id], target_location: tl }
+      managed_files.push(mf)
+    end
+  end
+  managed_files
+end
+
+def config_xml_template(config_xml, description, managed_files)
   template config_xml do
     source 'config.xml.erb'
     cookbook 'jenkins_utils'
@@ -115,14 +139,15 @@ def create_cookbook_job
               can_roam: new_resource.can_roam,
               job_disabled: new_resource.job_disabled,
               block_downstream: new_resource.block_downstream,
+              auth_token: new_resource.auth_token,
+              build_timers: new_resource.build_timers,
+              scm_poll_timers: new_resource.scm_poll_timers,
+              ignore_post_commit_hooks: new_resource.ignore_post_commit_hooks,
               block_upstream: new_resource.block_upstream,
               concurrent_build: new_resource.concurrent_build,
               commands: new_resource.commands,
-              managed_files: new_resource.managed_files,
+              managed_files: managed_files,
               rvm_env: new_resource.rvm_env)
-  end
-  jenkins_job new_resource.name do
-    config config_xml
   end
 end
 

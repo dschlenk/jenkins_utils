@@ -34,6 +34,11 @@ module JenkinsUtils
       || disabled(doc, cr.job_disabled) != cr.job_disabled\
       || block_downstream(doc, cr.block_downstream) != cr.block_downstream\
       || block_upstream(doc, cr.block_upstream) != cr.block_upstream\
+      || auth_token(doc, cr.auth_token) != cr.auth_token\
+      || build_timers(doc, cr.build_timers) != cr.build_timers\
+      || scm_poll_timers(doc, cr.scm_poll_timers) != cr.scm_poll_timers\
+      || ignore_post_commit_hooks(doc, cr.ignore_post_commit_hooks)\
+      != cr.ignore_post_commit_hooks\
       || concurrent_build(doc, cr.concurrent_build) != cr.concurrent_build\
       || commands(doc, cr.commands) != cr.commands\
       || managed_files(doc) != cr.managed_files\
@@ -86,8 +91,23 @@ module JenkinsUtils
     text_el(doc, init, '/project/blockBuildWhenDownstreamBuilding')
   end
 
-  def block_upstream(doc, init)
-    text_el(doc, init, '/project/blockBuildWhenUpstreamBuilding')
+  def auth_token(doc, init)
+    text_el(doc, init, '/project/authToken')
+  end
+
+  def build_timers(doc, init)
+    ji = init.join("\n")
+    text_el(doc, ji, '/project/triggers/hudson.triggers.TimerTrigger/spec')
+  end
+
+  def scm_poll_timers(doc, init)
+    ji = init.join("\n")
+    text_el(doc, ji, '/project/triggers/hudson.triggers.SCMTrigger/spec')
+  end
+
+  def ignore_post_commit_hooks(doc, init)
+    text_el(doc, init, '/project/triggers/hudson.triggers.SCMTrigger/'\
+            'ignorePostCommitHooks')
   end
 
   def concurrent_build(doc, init)
@@ -158,7 +178,7 @@ module JenkinsUtils
       node['jenkins']['master']['home']
     end
 
-    def remove_custom_file(node, id)
+    def remove_custom_file(node, name)
       script_path = "#{Chef::Config[:file_cache_path]}/removeCustomFile.groovy"
       template script_path do
         source 'removeCustomFile.groovy.erb'
@@ -167,7 +187,7 @@ module JenkinsUtils
         group node['jenkins']['master']['group']
         mode 00644
         variables(
-          id: id
+          id: config_files(node)[name][:id]
         )
       end
 
@@ -178,19 +198,21 @@ module JenkinsUtils
       remove_custom_file_script.close
     end
 
-    def custom_file_exists?(node, id)
+    def custom_file_exists?(node, name)
       cf = config_files(node)
-      return true if !cf.nil? && cf.key?(id)
+      return true if !cf.nil? && cf.key?(name)
       false
     end
 
-    def custom_file_changed?(node, id, name, comment, content)
-      config_files(node)[id] == { id:  id, name: name,
-                                  comment: comment, content: content }
+    def custom_file_changed?(node, name, comment, content)
+      config_files(node)[name] == { id: config_files(node)[name][:id],
+                                    name: name, comment: comment,
+                                    content: content }
     end
 
     def config_files(node)
       jenkins_pkg_str = 'org.jenkinsci.plugins.configfiles.custom.CustomConfig'
+      conf_pkg_str = 'org.jenkinsci.lib.configprovider.model.Config'
       ccf = "#{jenkins_home(node)}/custom-config-files.xml"
       @config_files ||=
         begin
@@ -202,13 +224,12 @@ module JenkinsUtils
             configs_el = doc.elements["/#{jenkins_pkg_str}Provider[@plugin = \
               'config-file-provider@2.7.5']/configs"]
             configs_el.elements.each do |entry|
-              key = entry.elements['string'].text
-              id = entry.elements["#{jenkins_pkg_str}/id"].text
-              name = entry.elements["#{jenkins_pkg_str}/name"].text
-              comment = entry.elements["#{jenkins_pkg_str}/comment"].text
-              content = entry.elements["#{jenkins_pkg_str}/content"].text
-              config_files[key] = { id: id, name: name, comment: comment,
-                                    content: content }
+              id = entry.elements["#{conf_pkg_str}/id"].text
+              name = entry.elements["#{conf_pkg_str}/name"].text
+              comment = entry.elements["#{conf_pkg_str}/comment"].text
+              content = entry.elements["#{conf_pkg_str}/content"].text
+              config_files[name] = { id: id, name: name, comment: comment,
+                                     content: content }
             end
           end
           config_files

@@ -45,14 +45,13 @@ def load_current_resource
   @current_resource =
     Chef::Resource::JenkinsUtilsCustomFile.new(@new_resource.name)
   @current_resource.name(@new_resource.name)
-  @current_resource.id(@new_resource.id)
   @current_resource.comment(@new_resource.comment)
   @current_resource.content(@new_resource.content)
 
-  return unless custom_file_exists?(node, @current_resource.id)
+  return unless custom_file_exists?(node, @current_resource.name)
   @current_resource.exists = true
   @current_resource.changed = true if custom_file_changed?(
-    node, @current_resource.id, @current_resource.name,
+    node, @current_resource.name,
     @current_resource.comment, @current_resource.content)
 end
 
@@ -60,7 +59,7 @@ private
 
 def create_custom_file
   script_path = "#{Chef::Config[:file_cache_path]}/updateCustomFile.groovy"
-  update_custom_file_script = write_script(new_resource.id, new_resource.name,
+  update_custom_file_script = write_script(new_resource.name,
                                            new_resource.comment,
                                            new_resource.content,
                                            script_path)
@@ -70,19 +69,19 @@ def create_custom_file
   update_custom_file_script.close
 end
 
-def write_script(id, name, comment, content, script_path)
+def write_script(name, comment, content, script_path)
   template script_path do
     source 'updateCustomFile.groovy.erb'
     cookbook 'jenkins_utils'
     owner node['jenkins']['master']['user']
     group node['jenkins']['master']['group']
     mode '00644'
-    variables(id: id, name: name, comment: comment, content: content)
+    variables(name: name, comment: comment, content: content)
     action :nothing
   end.run_action(:create)
   ::File.new(script_path)
 end
 
 def delete_custom_file
-  remove_custom_file(node, new_resource.id)
+  remove_custom_file(node, new_resource.name)
 end

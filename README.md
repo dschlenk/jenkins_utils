@@ -28,13 +28,11 @@ Use this resource to make custom config files available to jobs in Jenkins. Uses
 jenkins_utils_custom_file ".kitchen.local.yml-openstack" do
   id '.kitchen.local.yml-openstack'
   comment 'Change test kitchen driver to openstack'
-  content <<-EOH.gsub(/^ {4}/, '')
-    ---
-    driver:
-      name: openstack
-  EOH
+  content ['---', 'driver:', '  name: openstack']
 end
 ```
+
+Specify content as an array of strings representing the lines in the file. 
 
 ### jenkins_utils_cookbook_job
 
@@ -51,7 +49,7 @@ jenkins_utils_cookbook_job "sudo" do
 end
 ```
 
-This will add a job that tests the official openssh cookbook. Note that it includes a managed_files attribute that references the ID of the custom file we added in the previous resource.
+This will add a job that tests the official openssh cookbook. Note that it includes a managed_files attribute that references the ID of the custom file we added in the previous resource. See source and test fixtures for other options available including various build pipeline options, scheduling options and setting an auth token for ad-hoc/script triggered builds. 
 
 Development
 -----------

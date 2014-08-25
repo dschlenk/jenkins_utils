@@ -9,6 +9,12 @@ describe 'jenkins_utils::deps' do
     end.converge(described_recipe)
   end
 
+  before do
+    stub_command("bash -c \"source /var/lib/jenkins/.rvm/scripts/rvm &&\
+ type rvm | cat | head -1 | grep -q '^rvm is a function$'\"")
+ .and_return(true)
+  end
+
   it 'includes default git recipe' do
     expect(chef_run).to include_recipe('git::default')
   end
@@ -51,10 +57,6 @@ describe 'jenkins_utils::deps' do
 
   it 'installs jenkins plugin warnings' do
     expect(chef_run).to install_jenkins_plugin('warnings')
-  end
-
-  it 'installs jenkins plugin ruby-runtime' do
-    expect(chef_run).to install_jenkins_plugin('ruby-runtime')
   end
 
   it 'installs jenkins plugin rvm' do

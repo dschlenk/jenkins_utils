@@ -31,7 +31,24 @@
   <blockBuildWhenDownstreamBuilding><%=@block_downstream%></blockBuildWhenDownstreamBuilding>
   <!-- default false -->
   <blockBuildWhenUpstreamBuilding><%=@block_upstream%></blockBuildWhenUpstreamBuilding>
-  <triggers/>
+  <% unless @auth_token.nil? -%>
+  <authToken><%=@auth_token%></authToken>
+  <% end -%>
+  <triggers>
+  <% unless @build_timers.nil? -%>
+    <hudson.triggers.TimerTrigger>
+      <spec><% @build_timers.each do |timer| -%><%=timer%>
+<% end -%></spec>
+    </hudson.triggers.TimerTrigger>
+  <% end -%>
+  <% unless @scm_poll_timers.nil? -%>
+    <hudson.triggers.SCMTrigger>
+      <spec><% @scm_poll_timers.each do |timer| -%><%=timer%>
+<% end -%></spec>
+    <ignorePostCommitHooks><%=@ignore_post_commit_hooks%></ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  <% end -%>
+  </triggers>
   <!-- default false -->
   <concurrentBuild><%=@concurrent_build%></concurrentBuild>
   <builders>
@@ -46,11 +63,11 @@
   </builders>
   <publishers/>
   <buildWrappers>
-    <org.jenkinsci.plugins.configfiles.buildwrapper.ConfigFileBuildWrapper plugin="config-file-provider@2.7.4">
+    <org.jenkinsci.plugins.configfiles.buildwrapper.ConfigFileBuildWrapper plugin="config-file-provider@2.7.5">
       <managedFiles>
 <% @managed_files.each do |file| -%>
         <org.jenkinsci.plugins.configfiles.buildwrapper.ManagedFile>
-          <fileId><%=file[:id]%></fileId>
+          <fileId><%=file[:file_id]%></fileId>
           <targetLocation><%=file[:target_location]%></targetLocation>
           <variable><%=file[:variable]%></variable>
         </org.jenkinsci.plugins.configfiles.buildwrapper.ManagedFile>

@@ -17,10 +17,20 @@
 if platform_family?('debian')
   node.set['apt']['compile_time_update'] = true
   include_recipe 'apt::default'
-  package 'libxml2-utils'
+  %w{libxml2-utils bash gawk sed grep debianutils coreutils tar curl gzip bzip2}
+  .each do |pkg|
+    package pkg
+  end
 end
 
 include_recipe 'git::default'
+node.set['rvm']['user_installs'] = [
+  { 'user' => 'jenkins',
+    'home' => '/var/lib/jenkins',
+    'default_ruby' => 'ruby-2.0',
+    'rubies' => ['1.9.3', '2.0', '2.1']
+  }
+]
 include_recipe 'rvm::user'
 
 # required to make the tests happy. You'll want to define this properly.
