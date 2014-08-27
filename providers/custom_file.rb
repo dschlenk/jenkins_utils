@@ -59,7 +59,10 @@ private
 
 def create_custom_file
   script_path = "#{Chef::Config[:file_cache_path]}/updateCustomFile.groovy"
-  update_custom_file_script = write_script(new_resource.name,
+  current_config = config_files(node)[new_resource.name]
+  id = current_config[:id] unless current_config.nil?
+  update_custom_file_script = write_script(id,
+                                           new_resource.name,
                                            new_resource.comment,
                                            new_resource.content,
                                            script_path)
@@ -69,14 +72,14 @@ def create_custom_file
   update_custom_file_script.close
 end
 
-def write_script(name, comment, content, script_path)
+def write_script(id, name, comment, content, script_path)
   template script_path do
     source 'updateCustomFile.groovy.erb'
     cookbook 'jenkins_utils'
     owner node['jenkins']['master']['user']
     group node['jenkins']['master']['group']
     mode '00644'
-    variables(name: name, comment: comment, content: content)
+    variables(id: id, name: name, comment: comment, content: content)
     action :nothing
   end.run_action(:create)
   ::File.new(script_path)

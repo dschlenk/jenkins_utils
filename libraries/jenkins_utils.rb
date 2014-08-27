@@ -205,7 +205,7 @@ module JenkinsUtils
     end
 
     def custom_file_changed?(node, name, comment, content)
-      config_files(node)[name] == { id: config_files(node)[name][:id],
+      config_files(node)[name] != { id: config_files(node)[name][:id],
                                     name: name, comment: comment,
                                     content: content }
     end
