@@ -26,22 +26,23 @@ module JenkinsUtils
 
   def job_changed?(node, cr)
     doc = job_doc(node, cr.name)
+    mgfs = managed_files(doc)
     if description(doc, cr.description) != cr.description\
-      || keep_deps(doc, cr.keep_dependencies) != cr.keep_dependencies\
+      || keep_deps(doc, cr.keep_dependencies) != cr.keep_dependencies.to_s\
       || repo_txt(doc, cr.git_repo_url) != cr.git_repo_url\
       || branch_txt(doc, cr.git_branch) != cr.git_branch\
-      || can_roam(doc, cr.can_roam) != cr.can_roam\
-      || disabled(doc, cr.job_disabled) != cr.job_disabled\
-      || block_downstream(doc, cr.block_downstream) != cr.block_downstream\
-      || block_upstream(doc, cr.block_upstream) != cr.block_upstream\
+      || can_roam(doc, cr.can_roam) != cr.can_roam.to_s\
+      || disabled(doc, cr.job_disabled) != cr.job_disabled.to_s\
+      || block_downstream(doc, cr.block_downstream) != cr.block_downstream.to_s\
+      || block_upstream(doc, cr.block_upstream) != cr.block_upstream.to_s\
       || auth_token(doc, cr.auth_token) != cr.auth_token\
       || build_timers(doc, cr.build_timers) != cr.build_timers\
       || scm_poll_timers(doc, cr.scm_poll_timers) != cr.scm_poll_timers\
       || ignore_post_commit_hooks(doc, cr.ignore_post_commit_hooks)\
-      != cr.ignore_post_commit_hooks\
-      || concurrent_build(doc, cr.concurrent_build) != cr.concurrent_build\
+      != cr.ignore_post_commit_hooks.to_s\
+      || concurrent_build(doc, cr.concurrent_build) != cr.concurrent_build.to_s\
       || commands(doc, cr.commands) != cr.commands\
-      || managed_files(doc) != cr.managed_files\
+      || managed_files(doc) != config_managed_files(node, cr.managed_files)\
       || rvm_env_txt(doc, cr.rvm_env) != cr.rvm_env
       return true
     end
@@ -91,18 +92,28 @@ module JenkinsUtils
     text_el(doc, init, '/project/blockBuildWhenDownstreamBuilding')
   end
 
+  def block_upstream(doc, init)
+    text_el(doc, init, '/project/blockBuildWhenUpstreamBuilding')
+  end
+
   def auth_token(doc, init)
     text_el(doc, init, '/project/authToken')
   end
 
   def build_timers(doc, init)
+    init = [] if init == nil
     ji = init.join("\n")
-    text_el(doc, ji, '/project/triggers/hudson.triggers.TimerTrigger/spec')
+    ji += "\n" unless ji == ""
+    text = text_el(doc, ji, '/project/triggers/hudson.triggers.TimerTrigger/spec')
+    text.lines.to_a.map!{|line| line.chomp}
   end
 
   def scm_poll_timers(doc, init)
+    init = [] if init == nil
     ji = init.join("\n")
-    text_el(doc, ji, '/project/triggers/hudson.triggers.SCMTrigger/spec')
+    ji += "\n" unless ji == ""
+    text = text_el(doc, ji, '/project/triggers/hudson.triggers.SCMTrigger/spec')
+    text.lines.to_a.map!{|line| line.chomp}
   end
 
   def ignore_post_commit_hooks(doc, init)
@@ -137,10 +148,25 @@ module JenkinsUtils
       begin
         cmd_el = doc.elements['/project/builders/hudson.tasks.Shell/command']
         command_txt = cmd_el.text
-        command_lines = command_txt.split('\n')
-        command_lines.reject! { |line| line.empty? || line.match(/^\s+$/) }
-        command_lines.each { |line| line.strip! }
+        command_lines = command_txt.lines.to_a.map!{|line| line.chomp }
+        command_lines.reject!{ |line| line.empty? || line.match(/^\s+$/) }
       end
+  end
+
+  def config_managed_files(node, managed_files)
+    mgfs = config_files(node)
+    managed_files.map do |mgf|
+      unless mgf.key? :file_id
+        fn = mgf['file_name'] || mgf[:file_name]
+        tl = mgf['target_location'] || mgf[:target_location]
+        mgf.delete('file_name')
+        mgf.delete(:file_name)
+        mgf.delete('target_location')
+        mgf[:file_id] = mgfs[fn][:id]
+        mgf[:target_location] = tl
+      end
+      mgf
+    end
   end
 
   def managed_files(doc)
@@ -154,6 +180,7 @@ module JenkinsUtils
                          mf_els.elements.each do |mf_el|
                            fileid_el = mf_el.elements['fileId']
                            target_location_el = mf_el.elements['targetLocation']
+                           name_el = mf_el.elements
                            mfs << { file_id:  fileid_el.text,
                                     target_location: target_location_el.text }
                          end
@@ -205,9 +232,12 @@ module JenkinsUtils
     end
 
     def custom_file_changed?(node, name, comment, content)
-      config_files(node)[name] != { id: config_files(node)[name][:id],
-                                    name: name, comment: comment,
-                                    content: content }
+      contentstr = content.join + "\n"
+      curr_file_obj = config_files(node)[name]
+      new_file_obj = { id: config_files(node)[name][:id],
+                        name: name, comment: comment,
+                        content: contentstr}
+      config_files(node)[name] != new_file_obj
     end
 
     def config_files(node)

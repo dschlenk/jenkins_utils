@@ -87,6 +87,10 @@ def load_current_resource
   @current_resource.job_disabled(@new_resource.job_disabled)
   @current_resource.block_downstream(@new_resource.block_downstream)
   @current_resource.block_upstream(@new_resource.block_upstream)
+  @current_resource.auth_token(@new_resource.auth_token)
+  @current_resource.build_timers(@new_resource.build_timers)
+  @current_resource.scm_poll_timers(@new_resource.scm_poll_timers)
+  @current_resource.ignore_post_commit_hooks(@new_resource.ignore_post_commit_hooks)
   @current_resource.concurrent_build(@new_resource.concurrent_build)
   @current_resource.commands(@new_resource.commands)
   @current_resource.managed_files(@new_resource.managed_files)
@@ -120,7 +124,6 @@ def process_managed_files
       fn = file[:file_name] || file['file_name']
       tl = file[:target_location] || file['target_location']
       cnf_file = config_files(node)[fn]
-      Chef::Log.info("fn: #{fn}; cnf_files: #{cnf_file}; tl: #{tl}")
       mf = { file_id: cnf_file[:id], target_location: tl }
       managed_files.push(mf)
     end
