@@ -29,4 +29,4 @@ Style/SingleSpaceBeforeFirstArg:
     - **/metadata.rb
 
 Style/MethodLength:
-  Max: 25
+  Max: 27

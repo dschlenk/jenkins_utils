@@ -10,6 +10,6 @@ group :integration do
   gem 'kitchen-vagrant', '~> 0.11'
   gem 'kitchen-digitalocean'
   gem 'kitchen-ec2'
-  gem 'kitchen-openstack'
+  gem 'kitchen-openstack', '= 1.6.0'
   gem 'rvm'
 end

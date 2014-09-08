@@ -26,7 +26,6 @@ module JenkinsUtils
 
   def job_changed?(node, cr)
     doc = job_doc(node, cr.name)
-    mgfs = managed_files(doc)
     if description(doc, cr.description) != cr.description\
       || keep_deps(doc, cr.keep_dependencies) != cr.keep_dependencies.to_s\
       || repo_txt(doc, cr.git_repo_url) != cr.git_repo_url\
@@ -101,19 +100,20 @@ module JenkinsUtils
   end
 
   def build_timers(doc, init)
-    init = [] if init == nil
+    init = [] if init.nil?
     ji = init.join("\n")
-    ji += "\n" unless ji == ""
-    text = text_el(doc, ji, '/project/triggers/hudson.triggers.TimerTrigger/spec')
-    text.lines.to_a.map!{|line| line.chomp}
+    ji += "\n" unless ji == ''
+    text =
+      text_el(doc, ji, '/project/triggers/hudson.triggers.TimerTrigger/spec')
+    text.lines.to_a.map! { |line| line.chomp }
   end
 
   def scm_poll_timers(doc, init)
-    init = [] if init == nil
+    init = [] if init.nil?
     ji = init.join("\n")
-    ji += "\n" unless ji == ""
+    ji += "\n" unless ji == ''
     text = text_el(doc, ji, '/project/triggers/hudson.triggers.SCMTrigger/spec')
-    text.lines.to_a.map!{|line| line.chomp}
+    text.lines.to_a.map! { |line| line.chomp }
   end
 
   def ignore_post_commit_hooks(doc, init)
@@ -148,8 +148,8 @@ module JenkinsUtils
       begin
         cmd_el = doc.elements['/project/builders/hudson.tasks.Shell/command']
         command_txt = cmd_el.text
-        command_lines = command_txt.lines.to_a.map!{|line| line.chomp }
-        command_lines.reject!{ |line| line.empty? || line.match(/^\s+$/) }
+        command_lines = command_txt.lines.to_a.map! { |line| line.chomp }
+        command_lines.reject! { |line| line.empty? || line.match(/^\s+$/) }
       end
   end
 
@@ -180,7 +180,6 @@ module JenkinsUtils
                          mf_els.elements.each do |mf_el|
                            fileid_el = mf_el.elements['fileId']
                            target_location_el = mf_el.elements['targetLocation']
-                           name_el = mf_el.elements
                            mfs << { file_id:  fileid_el.text,
                                     target_location: target_location_el.text }
                          end
@@ -233,10 +232,9 @@ module JenkinsUtils
 
     def custom_file_changed?(node, name, comment, content)
       contentstr = content.join + "\n"
-      curr_file_obj = config_files(node)[name]
       new_file_obj = { id: config_files(node)[name][:id],
-                        name: name, comment: comment,
-                        content: contentstr}
+                       name: name, comment: comment,
+                       content: contentstr }
       config_files(node)[name] != new_file_obj
     end
 

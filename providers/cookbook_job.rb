@@ -77,7 +77,8 @@ action :enable do
 end
 
 def load_current_resource
-  @current_resource = Chef::Resource::JenkinsUtilsCookbookJob.new(@new_resource.name)
+  @current_resource =
+    Chef::Resource::JenkinsUtilsCookbookJob.new(@new_resource.name)
   @current_resource.name(@new_resource.name)
   @current_resource.description(@new_resource.description)
   @current_resource.keep_dependencies(@new_resource.keep_dependencies)
@@ -90,7 +91,8 @@ def load_current_resource
   @current_resource.auth_token(@new_resource.auth_token)
   @current_resource.build_timers(@new_resource.build_timers)
   @current_resource.scm_poll_timers(@new_resource.scm_poll_timers)
-  @current_resource.ignore_post_commit_hooks(@new_resource.ignore_post_commit_hooks)
+  @current_resource.ignore_post_commit_hooks(
+    @new_resource.ignore_post_commit_hooks)
   @current_resource.concurrent_build(@new_resource.concurrent_build)
   @current_resource.commands(@new_resource.commands)
   @current_resource.managed_files(@new_resource.managed_files)
