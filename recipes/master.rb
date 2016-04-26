@@ -17,7 +17,7 @@
 # Apache 2.0
 #
 node.set['jenkins']['master']['install_method'] = 'war'
-node.set['jenkins']['master']['version'] = '1.555'
+#node.set['jenkins']['master']['version'] = '1.555'
 node.set['jenkins']['executor']['timeout'] = 300
 
 mirror = node['jenkins']['master']['mirror']
